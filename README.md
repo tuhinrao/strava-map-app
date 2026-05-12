@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Strava Map App
 
-## Getting Started
+Personal Next.js activity explorer for Strava/Garmin data already synced into PostgreSQL.
 
-First, run the development server:
+## Setup
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` locally:
 
-## Learn More
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE_NAME
+```
 
-To learn more about Next.js, take a look at the following resources:
+Do not commit `.env.local`. The browser never connects to PostgreSQL directly; all database access goes through Next.js API routes under `src/app/api`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pointing To The VPS DB
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Use a PostgreSQL connection string that reaches the VPS database from your PC. Common options:
 
-## Deploy on Vercel
+- SSH tunnel from local port `5432` to the VPS PostgreSQL service, then use `localhost` in `DATABASE_URL`.
+- A restricted PostgreSQL user and firewall rule that only allows your development machine.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Keep DB credentials server-side only. Do not expose `DATABASE_URL` through `NEXT_PUBLIC_*` variables or client code.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pages
+
+- `/` dashboard with summary cards, recent routes map, and recent activity list.
+- `/activities` searchable activity table.
+- `/activities/[id]` detail page with one route, stats, and nearest point popups.
+- `/heatmap` personal heatmap using low-opacity route overlays from your own tracks.
+
+## API Routes
+
+- `GET /api/summary`
+- `GET /api/activities`
+- `GET /api/activities/[id]`
+- `GET /api/routes/recent`
+- `GET /api/heatmap`
+
+## Database Assumptions
+
+The app assumes these existing tables and columns:
+
+- `public.strava_activities`: `id`, `name`, `sport_type`, `start_date`, `distance`, `moving_time`, `elapsed_time`, `total_elevation_gain`, `average_speed`, `max_speed`, `average_heartrate`, `max_heartrate`, `synced_at`
+- `public.strava_activity_points`: `activity_id`, `point_index`, `time`, `lat`, `lng`, `distance`, `altitude`, `heartrate`, `cadence`, `watts`, `velocity_smooth`
+
+If the VPS schema differs, adjust the SQL in `src/lib/activityQueries.ts`.
+
+## Build
+
+```bash
+npm run build
+```
