@@ -6,7 +6,8 @@ import type { LatLngBoundsExpression, LeafletMouseEvent } from "leaflet";
 import type { ActivityPoint, ActivityRoute } from "@/types/activity";
 import { LeafletMap } from "@/components/maps/LeafletMap";
 import { formatDistance, formatElevation, formatDateTime } from "@/lib/format";
-import { colorForSport, getRouteBounds, nearestPoint } from "@/lib/geo";
+import { getRouteBounds, nearestPoint } from "@/lib/geo";
+import { activityMapTheme, getActivityColor } from "@/lib/activityMapTheme";
 import { Stack, Typography } from "@mui/material";
 
 export function ActivityRouteMap({ activity }: { activity: ActivityRoute }) {
@@ -25,11 +26,31 @@ export function ActivityRouteMap({ activity }: { activity: ActivityRoute }) {
     setSelectedPoint(nearest?.point ?? null);
   }
 
+  const routeColor = getActivityColor(activity.sportType);
+  const routePositions = activity.points.map((point) => [point.lat, point.lng] as [number, number]);
+
   return (
     <LeafletMap bounds={bounds} height={560}>
       <Polyline
-        positions={activity.points.map((point) => [point.lat, point.lng])}
-        pathOptions={{ color: colorForSport(activity.sportType), weight: 5, opacity: 0.95 }}
+        positions={routePositions}
+        pathOptions={{
+          color: activityMapTheme.routeOutlineColor,
+          weight: activityMapTheme.route.selectedOutlineWeight,
+          opacity: activityMapTheme.routeOutlineOpacity,
+          lineCap: "round",
+          lineJoin: "round",
+        }}
+        eventHandlers={{ click: handleRouteClick, mousemove: handleRouteClick }}
+      />
+      <Polyline
+        positions={routePositions}
+        pathOptions={{
+          color: routeColor,
+          weight: activityMapTheme.route.selectedForegroundWeight,
+          opacity: 1,
+          lineCap: "round",
+          lineJoin: "round",
+        }}
         eventHandlers={{ click: handleRouteClick, mousemove: handleRouteClick }}
       />
       {selectedPoint && (

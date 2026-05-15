@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Polyline } from "react-leaflet";
 import type { LatLngBoundsExpression, LeafletMouseEvent } from "leaflet";
 import {
@@ -18,7 +18,8 @@ import {
 } from "@mui/material";
 import type { ActivityRoute } from "@/types/activity";
 import { LeafletMap } from "@/components/maps/LeafletMap";
-import { colorForSport, getRouteBounds, haversineMeters } from "@/lib/geo";
+import { getRouteBounds, haversineMeters } from "@/lib/geo";
+import { activityMapTheme, getActivityColor } from "@/lib/activityMapTheme";
 import { formatDate, formatDistance, formatElevation } from "@/lib/format";
 
 type HeatmapRoutesMapProps = {
@@ -54,18 +55,30 @@ export function HeatmapRoutesMap({ routes, opacity, lineWidth }: HeatmapRoutesMa
     <>
       <LeafletMap bounds={bounds} height="calc(100vh - 260px)">
         {routes.map((route) => (
-          <Polyline
-            key={route.id}
-            positions={route.points.map((point) => [point.lat, point.lng])}
-            pathOptions={{
-              color: colorForSport(route.sportType),
-              weight: lineWidth,
-              opacity,
-              lineCap: "round",
-              lineJoin: "round",
-            }}
-            eventHandlers={{ click: handleClick }}
-          />
+          <Fragment key={route.id}>
+            <Polyline
+              positions={route.points.map((point) => [point.lat, point.lng])}
+              pathOptions={{
+                color: activityMapTheme.routeOutlineColor,
+                weight: lineWidth + 4,
+                opacity: Math.min(opacity + 0.14, 0.8),
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+              eventHandlers={{ click: handleClick }}
+            />
+            <Polyline
+              positions={route.points.map((point) => [point.lat, point.lng])}
+              pathOptions={{
+                color: getActivityColor(route.sportType),
+                weight: lineWidth,
+                opacity,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+              eventHandlers={{ click: handleClick }}
+            />
+          </Fragment>
         ))}
       </LeafletMap>
       <Drawer anchor="right" open={matches.length > 0} onClose={() => setMatches([])}>

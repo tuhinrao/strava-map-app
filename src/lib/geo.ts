@@ -1,18 +1,8 @@
 import type { ActivityPoint, ActivityRoute, LatLngPoint } from "@/types/activity";
-
-export const sportColors: Record<string, string> = {
-  Run: "#ff6b35",
-  Ride: "#31d0aa",
-  MountainBikeRide: "#8bd450",
-  Walk: "#ffd166",
-  Hike: "#a0c4ff",
-  Swim: "#4cc9f0",
-  Workout: "#f15bb5",
-};
+import { getActivityColor } from "@/lib/activityMapTheme";
 
 export function colorForSport(sportType?: string | null) {
-  if (!sportType) return "#ffffff";
-  return sportColors[sportType] ?? "#b8c7d9";
+  return getActivityColor(sportType);
 }
 
 export function getRouteBounds(routes: ActivityRoute[]) {

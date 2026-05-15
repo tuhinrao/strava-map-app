@@ -43,3 +43,60 @@ a {
 .leaflet-control-attribution {
   font-size: 11px;
 }
+
+.activity-map-icon {
+  background: transparent;
+  border: 0;
+}
+
+.activity-cluster,
+.activity-point,
+.activity-endpoint {
+  --activity-color: #12f7ff;
+  display: grid;
+  place-items: center;
+  border: 3px solid #05070a;
+  border-radius: 999px;
+  background: var(--activity-color);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.82),
+    0 0 20px color-mix(in srgb, var(--activity-color) 72%, transparent);
+}
+
+.activity-cluster {
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+.activity-point {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.88),
+    0 0 16px color-mix(in srgb, var(--activity-color) 76%, transparent);
+}
+
+.activity-point.is-selected {
+  animation: activityPulse 1.25s ease-in-out infinite;
+}
+
+.activity-endpoint {
+  border-width: 2px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.76);
+}
+
+@keyframes activityPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 18px color-mix(in srgb, var(--activity-color) 78%, transparent);
+  }
+  50% {
+    transform: scale(1.35);
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.95),
+      0 0 30px color-mix(in srgb, var(--activity-color) 90%, transparent);
+  }
+}
