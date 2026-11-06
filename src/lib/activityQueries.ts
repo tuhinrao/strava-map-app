@@ -52,7 +52,7 @@ const activityColumns = `
   max_speed,
   average_heartrate,
   max_heartrate,
-  synced_at
+  fetched_at AS synced_at
 `;
 
 export async function getSummary(): Promise<DashboardSummary> {
@@ -130,9 +130,19 @@ export async function getActivityById(id: number): Promise<ActivityRoute | null>
 
   const points = await query<PointRow>(
     `
-      SELECT point_index, "time", lat, lng, distance, altitude, heartrate, cadence, watts, velocity_smooth
+      SELECT
+        point_index,
+        NULL::timestamptz AS "time",
+        latitude AS lat,
+        longitude AS lng,
+        distance_meters AS distance,
+        altitude_meters AS altitude,
+        heartrate,
+        cadence,
+        watts,
+        velocity_smooth
       FROM public.strava_activity_points
-      WHERE activity_id = $1 AND lat IS NOT NULL AND lng IS NOT NULL
+      WHERE activity_id = $1 AND latitude IS NOT NULL AND longitude IS NOT NULL
       ORDER BY point_index ASC
     `,
     [id],
@@ -178,9 +188,17 @@ async function hydrateRoutes(activities: ActivityRow[]) {
   const ids = activities.map((activity) => Number(activity.id));
   const pointRows = await query<(PointRow & { activity_id: string | number })>(
     `
-      SELECT activity_id, point_index, "time", lat, lng, distance, altitude, heartrate
+      SELECT
+        activity_id,
+        point_index,
+        NULL::timestamptz AS "time",
+        latitude AS lat,
+        longitude AS lng,
+        distance_meters AS distance,
+        altitude_meters AS altitude,
+        heartrate
       FROM public.strava_activity_points
-      WHERE activity_id = ANY($1::bigint[]) AND lat IS NOT NULL AND lng IS NOT NULL
+      WHERE activity_id = ANY($1::bigint[]) AND latitude IS NOT NULL AND longitude IS NOT NULL
       ORDER BY activity_id, point_index ASC
     `,
     [ids],
